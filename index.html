@@ -2,9 +2,307 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Hello World</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Streak Checklist</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .streak-counter {
+            font-size: 24px;
+            color: #4CAF50;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .date-display {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #ddd;
+            transition: all 0.3s ease;
+        }
+        
+        .checklist-item.completed {
+            background: #e8f5e8;
+            border-left-color: #4CAF50;
+        }
+        
+        .checklist-item input[type="checkbox"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+        
+        .checklist-item label {
+            flex-grow: 1;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .checklist-item.completed label {
+            text-decoration: line-through;
+            color: #666;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #ddd;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .completion-message {
+            text-align: center;
+            padding: 20px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 18px;
+            display: none;
+        }
+        
+        .reset-button {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        
+        .reset-button:hover {
+            background: #ff5252;
+        }
+    </style>
 </head>
 <body>
-<h1>Hello, World!</h1>
+    <div class="container">
+        <div class="header">
+            <h1>Daily Streak Checklist</h1>
+            <div class="date-display" id="currentDate"></div>
+            <div class="streak-counter">🔥 Current Streak: <span id="streakCount">0</span> days</div>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <div class="completion-message" id="completionMessage">
+            🎉 Congratulations! You've completed all tasks for today! 🎉
+        </div>
+        
+        <ul class="checklist" id="checklist">
+            <li class="checklist-item">
+                <input type="checkbox" id="task1">
+                <label for="task1">Drink 8 glasses of water</label>
+            </li>
+            <li class="checklist-item">
+                <input type="checkbox" id="task2">
+                <label for="task2">Exercise for 30 minutes</label>
+            </li>
+            <li class="checklist-item">
+                <input type="checkbox" id="task3">
+                <label for="task3">Read for 20 minutes</label>
+            </li>
+            <li class="checklist-item">
+                <input type="checkbox" id="task4">
+                <label for="task4">Meditate for 10 minutes</label>
+            </li>
+            <li class="checklist-item">
+                <input type="checkbox" id="task5">
+                <label for="task5">Write in journal</label>
+            </li>
+            <li class="checklist-item">
+                <input type="checkbox" id="task6">
+                <label for="task6">Practice gratitude</label>
+            </li>
+        </ul>
+        
+        <button class="reset-button" onclick="resetDay()">Reset Day</button>
+    </div>
+
+    <script>
+        class StreakTracker {
+            constructor() {
+                this.init();
+                this.setupEventListeners();
+                this.updateDisplay();
+            }
+            
+            init() {
+                // Display current date
+                const today = new Date().toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                document.getElementById('currentDate').textContent = today;
+                
+                // Check if it's a new day
+                this.checkNewDay();
+                
+                // Load saved state
+                this.loadTodaysProgress();
+            }
+            
+            checkNewDay() {
+                const today = new Date().toDateString();
+                const lastActiveDate = localStorage.getItem('lastActiveDate');
+                
+                if (lastActiveDate !== today) {
+                    // New day - check if yesterday was completed
+                    const wasYesterdayCompleted = localStorage.getItem('yesterdayCompleted') === 'true';
+                    
+                    if (lastActiveDate && !wasYesterdayCompleted) {
+                        // Streak broken
+                        localStorage.setItem('streakCount', '0');
+                    }
+                    
+                    // Reset for new day
+                    localStorage.setItem('lastActiveDate', today);
+                    localStorage.removeItem('todaysProgress');
+                    localStorage.setItem('yesterdayCompleted', 'false');
+                }
+            }
+            
+            setupEventListeners() {
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', () => {
+                        this.updateProgress();
+                        this.saveTodaysProgress();
+                    });
+                });
+            }
+            
+            loadTodaysProgress() {
+                const progress = JSON.parse(localStorage.getItem('todaysProgress') || '{}');
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                
+                checkboxes.forEach(checkbox => {
+                    if (progress[checkbox.id]) {
+                        checkbox.checked = true;
+                        checkbox.closest('.checklist-item').classList.add('completed');
+                    }
+                });
+                
+                this.updateProgress();
+            }
+            
+            saveTodaysProgress() {
+                const progress = {};
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                
+                checkboxes.forEach(checkbox => {
+                    progress[checkbox.id] = checkbox.checked;
+                });
+                
+                localStorage.setItem('todaysProgress', JSON.stringify(progress));
+            }
+            
+            updateProgress() {
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                const totalTasks = checkboxes.length;
+                let completedTasks = 0;
+                
+                checkboxes.forEach(checkbox => {
+                    const item = checkbox.closest('.checklist-item');
+                    if (checkbox.checked) {
+                        completedTasks++;
+                        item.classList.add('completed');
+                    } else {
+                        item.classList.remove('completed');
+                    }
+                });
+                
+                // Update progress bar
+                const progressPercentage = (completedTasks / totalTasks) * 100;
+                document.getElementById('progressFill').style.width = progressPercentage + '%';
+                
+                // Check if all tasks completed
+                if (completedTasks === totalTasks) {
+                    this.completeDay();
+                } else {
+                    document.getElementById('completionMessage').style.display = 'none';
+                }
+            }
+            
+            completeDay() {
+                document.getElementById('completionMessage').style.display = 'block';
+                
+                // Update streak
+                const wasAlreadyCompleted = localStorage.getItem('yesterdayCompleted') === 'true';
+                if (!wasAlreadyCompleted) {
+                    const currentStreak = parseInt(localStorage.getItem('streakCount') || '0');
+                    const newStreak = currentStreak + 1;
+                    localStorage.setItem('streakCount', newStreak.toString());
+                    localStorage.setItem('yesterdayCompleted', 'true');
+                    this.updateDisplay();
+                }
+            }
+            
+            updateDisplay() {
+                const streakCount = localStorage.getItem('streakCount') || '0';
+                document.getElementById('streakCount').textContent = streakCount;
+            }
+        }
+        
+        function resetDay() {
+            if (confirm('Are you sure you want to reset today\'s progress?')) {
+                localStorage.removeItem('todaysProgress');
+                localStorage.setItem('yesterdayCompleted', 'false');
+                location.reload();
+            }
+        }
+        
+        // Initialize the streak tracker when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new StreakTracker();
+        });
+    </script>
 </body>
 </html>
