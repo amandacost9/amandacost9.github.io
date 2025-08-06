@@ -142,6 +142,74 @@
         .reset-button:hover {
             background: #ff5252;
         }
+        
+        .add-task-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f0f8ff;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .add-task-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        
+        .add-task-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        
+        .add-task-button:hover {
+            background: #45a049;
+        }
+        
+        .delete-button {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+            display: none;
+        }
+        
+        .delete-button:hover {
+            background: #ff5252;
+        }
+        
+        .edit-mode-toggle {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .edit-mode-toggle:hover {
+            background: #1976D2;
+        }
+        
+        .edit-mode .delete-button {
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -160,71 +228,92 @@
             🎉 Congratulations! You've completed all tasks for today! 🎉
         </div>
         
+        <button class="edit-mode-toggle" onclick="toggleEditMode()">📝 Edit Protocol</button>
+        
+        <div class="add-task-section" id="addTaskSection" style="display: none;">
+            <h3>Add New Task</h3>
+            <input type="text" class="add-task-input" id="newTaskInput" placeholder="Enter new task..." maxlength="100">
+            <button class="add-task-button" onclick="addNewTask()">Add Task</button>
+        </div>
+        
         <ul class="checklist" id="checklist">
             <li class="checklist-item" draggable="true">
                 <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task1">
                 <label for="task1">Drink 80oz of water</label>
+                <button class="delete-button" onclick="deleteTask(this)">🗑️</button>
             </li>
             <li class="checklist-item" draggable="true">
                 <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task2">
                 <label for="task2">Eat 30g of protein - Breakfast</label>
+                <button class="delete-button" onclick="deleteTask(this)">🗑️</button>
             </li>
             <li class="checklist-item" draggable="true">
                 <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task3">
                 <label for="task3">Eat 30g of protein - Lunch</label>
+                <button class="delete-button" onclick="deleteTask(this)">🗑️</button>
             </li>
             <li class="checklist-item" draggable="true">
                 <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task4">
                 <label for="task4">Eat 30g of protein - Dinner</label>
+                <button class="delete-button" onclick="deleteTask(this)">🗑️</button>
             </li>
             <li class="checklist-item" draggable="true">
                 <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task5">
                 <label for="task5">No caffeine after 12pm</label>
+                <button class="delete-button" onclick="deleteTask(this)">🗑️</button>
             </li>
             <li class="checklist-item" draggable="true">
                 <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task6">
                 <label for="task6">Ovarian care drink</label>
+                <button class="delete-button" onclick="deleteTask(this)">🗑️</button>
             </li>
             <li class="checklist-item" draggable="true">
                 <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task7">
                 <label for="task7">Drink tea before bed</label>
+                <button class="delete-button" onclick="deleteTask(this)">🗑️</button>
             </li>
             <li class="checklist-item" draggable="true">
                 <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task8">
                 <label for="task8">No alcohol</label>
+                <button class="delete-button" onclick="deleteTask(this)">🗑️</button>
             </li>
             <li class="checklist-item" draggable="true">
                 <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task9">
                 <label for="task9">Kachava one time</label>
+                <button class="delete-button" onclick="deleteTask(this)">🗑️</button>
             </li>
             <li class="checklist-item" draggable="true">
                 <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task10">
                 <label for="task10">Finish eating by 6:30pm</label>
+                <button class="delete-button" onclick="deleteTask(this)">🗑️</button>
             </li>
             <li class="checklist-item" draggable="true">
                 <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task11">
                 <label for="task11">No phone after 8:30pm</label>
+                <button class="delete-button" onclick="deleteTask(this)">🗑️</button>
             </li>
             <li class="checklist-item" draggable="true">
                 <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task12">
                 <label for="task12">9:30pm bed time</label>
+                <button class="delete-button" onclick="deleteTask(this)">🗑️</button>
             </li>
             <li class="checklist-item" draggable="true">
                 <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task13">
                 <label for="task13">110g total protein for the day</label>
+                <button class="delete-button" onclick="deleteTask(this)">🗑️</button>
             </li>
         </ul>
         
@@ -234,6 +323,8 @@
     <script>
         class StreakTracker {
             constructor() {
+                this.taskCounter = 1;
+                this.isEditMode = false;
                 this.init();
                 this.setupEventListeners();
                 this.setupDragAndDrop();
@@ -252,6 +343,9 @@
                 
                 // Check if it's a new day
                 this.checkNewDay();
+                
+                // Load saved protocol first
+                this.loadSavedProtocol();
                 
                 // Load saved order first, then progress
                 this.loadSavedOrder();
@@ -282,13 +376,29 @@
             }
             
             setupEventListeners() {
+                // Add enter key support for the input
+                document.getElementById('newTaskInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        addNewTask();
+                    }
+                });
+                
+                this.updateCheckboxListeners();
+            }
+            
+            updateCheckboxListeners() {
                 const checkboxes = document.querySelectorAll('input[type="checkbox"]');
                 checkboxes.forEach(checkbox => {
-                    checkbox.addEventListener('change', () => {
-                        this.updateProgress();
-                        this.saveTodaysProgress();
-                    });
+                    // Remove existing listeners to avoid duplicates
+                    checkbox.removeEventListener('change', this.checkboxChangeHandler);
+                    // Add new listener
+                    checkbox.addEventListener('change', this.checkboxChangeHandler.bind(this));
                 });
+            }
+            
+            checkboxChangeHandler() {
+                this.updateProgress();
+                this.saveTodaysProgress();
             }
             
             loadTodaysProgress() {
@@ -383,6 +493,7 @@
                             el.classList.remove('drag-over');
                         });
                         this.saveOrder();
+                        this.saveProtocol();
                         draggedElement = null;
                     }
                 });
@@ -460,6 +571,104 @@
                     }
                 });
             }
+            
+            saveProtocol() {
+                const items = document.querySelectorAll('.checklist-item');
+                const protocol = Array.from(items).map(item => {
+                    const checkbox = item.querySelector('input[type="checkbox"]');
+                    const label = item.querySelector('label');
+                    return {
+                        id: checkbox.id,
+                        text: label.textContent
+                    };
+                });
+                localStorage.setItem('userProtocol', JSON.stringify(protocol));
+            }
+            
+            loadSavedProtocol() {
+                const savedProtocol = JSON.parse(localStorage.getItem('userProtocol') || '[]');
+                if (savedProtocol.length === 0) return;
+                
+                const checklist = document.getElementById('checklist');
+                checklist.innerHTML = '';
+                
+                savedProtocol.forEach(task => {
+                    this.createTaskElement(task.id, task.text, checklist);
+                });
+                
+                // Update task counter based on existing IDs
+                const existingIds = savedProtocol.map(task => parseInt(task.id.replace('task', '')));
+                this.taskCounter = Math.max(...existingIds, 0) + 1;
+            }
+            
+            createTaskElement(taskId, taskText, container) {
+                const li = document.createElement('li');
+                li.className = 'checklist-item';
+                li.draggable = true;
+                
+                li.innerHTML = `
+                    <span class="drag-handle">⋮⋮</span>
+                    <input type="checkbox" id="${taskId}">
+                    <label for="${taskId}">${taskText}</label>
+                    <button class="delete-button" onclick="deleteTask(this)">🗑️</button>
+                `;
+                
+                container.appendChild(li);
+            }
+            
+            addTask(taskText) {
+                const taskId = `task${this.taskCounter++}`;
+                const checklist = document.getElementById('checklist');
+                
+                this.createTaskElement(taskId, taskText, checklist);
+                this.updateCheckboxListeners();
+                this.saveProtocol();
+                this.saveOrder();
+            }
+        }
+        
+        let streakTracker;
+        
+        function toggleEditMode() {
+            const button = document.querySelector('.edit-mode-toggle');
+            const addSection = document.getElementById('addTaskSection');
+            const container = document.querySelector('.container');
+            
+            streakTracker.isEditMode = !streakTracker.isEditMode;
+            
+            if (streakTracker.isEditMode) {
+                button.textContent = '✅ Done Editing';
+                addSection.style.display = 'block';
+                container.classList.add('edit-mode');
+            } else {
+                button.textContent = '📝 Edit Protocol';
+                addSection.style.display = 'none';
+                container.classList.remove('edit-mode');
+            }
+        }
+        
+        function addNewTask() {
+            const input = document.getElementById('newTaskInput');
+            const taskText = input.value.trim();
+            
+            if (taskText) {
+                streakTracker.addTask(taskText);
+                input.value = '';
+            } else {
+                alert('Please enter a task description.');
+            }
+        }
+        
+        function deleteTask(button) {
+            if (confirm('Are you sure you want to delete this task?')) {
+                const item = button.closest('.checklist-item');
+                item.remove();
+                streakTracker.saveProtocol();
+                streakTracker.saveOrder();
+                streakTracker.updateProgress();
+                streakTracker.updateCheckboxListeners();
+            }
+        }
         }
         
         function resetDay() {
@@ -472,7 +681,7 @@
         
         // Initialize the streak tracker when page loads
         document.addEventListener('DOMContentLoaded', () => {
-            new StreakTracker();
+            streakTracker = new StreakTracker();
         });
     </script>
 </body>
