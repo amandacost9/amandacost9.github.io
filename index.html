@@ -51,6 +51,32 @@
             border-radius: 8px;
             border-left: 4px solid #ddd;
             transition: all 0.3s ease;
+            cursor: move;
+            user-select: none;
+        }
+        
+        .checklist-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        
+        .checklist-item.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+        
+        .checklist-item.drag-over {
+            border-top: 3px solid #4CAF50;
+        }
+        
+        .drag-handle {
+            margin-right: 10px;
+            color: #999;
+            font-size: 18px;
+            cursor: grab;
+        }
+        
+        .drag-handle:active {
+            cursor: grabbing;
         }
         
         .checklist-item.completed {
@@ -135,55 +161,68 @@
         </div>
         
         <ul class="checklist" id="checklist">
-            <li class="checklist-item">
+            <li class="checklist-item" draggable="true">
+                <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task1">
                 <label for="task1">Drink 80oz of water</label>
             </li>
-            <li class="checklist-item">
+            <li class="checklist-item" draggable="true">
+                <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task2">
                 <label for="task2">Eat 30g of protein - Breakfast</label>
             </li>
-            <li class="checklist-item">
+            <li class="checklist-item" draggable="true">
+                <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task3">
                 <label for="task3">Eat 30g of protein - Lunch</label>
             </li>
-            <li class="checklist-item">
+            <li class="checklist-item" draggable="true">
+                <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task4">
                 <label for="task4">Eat 30g of protein - Dinner</label>
             </li>
-            <li class="checklist-item">
+            <li class="checklist-item" draggable="true">
+                <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task5">
                 <label for="task5">No caffeine after 12pm</label>
             </li>
-            <li class="checklist-item">
+            <li class="checklist-item" draggable="true">
+                <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task6">
                 <label for="task6">Ovarian care drink</label>
             </li>
-                  <li class="checklist-item">
+            <li class="checklist-item" draggable="true">
+                <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task7">
                 <label for="task7">Drink tea before bed</label>
             </li>
-            <li class="checklist-item">
+            <li class="checklist-item" draggable="true">
+                <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task8">
                 <label for="task8">No alcohol</label>
             </li>
-            <li class="checklist-item">
+            <li class="checklist-item" draggable="true">
+                <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task9">
                 <label for="task9">Kachava one time</label>
             </li>
-            <li class="checklist-item">
+            <li class="checklist-item" draggable="true">
+                <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task10">
                 <label for="task10">Finish eating by 6:30pm</label>
             </li>
-            <li class="checklist-item">
+            <li class="checklist-item" draggable="true">
+                <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task11">
                 <label for="task11">No phone after 8:30pm</label>
             </li>
-            <li class="checklist-item">
+            <li class="checklist-item" draggable="true">
+                <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task12">
                 <label for="task12">9:30pm bed time</label>
             </li>
-                     <li class="checklist-item">
+            <li class="checklist-item" draggable="true">
+                <span class="drag-handle">⋮⋮</span>
                 <input type="checkbox" id="task13">
                 <label for="task13">110g total protein for the day</label>
             </li>
@@ -197,6 +236,7 @@
             constructor() {
                 this.init();
                 this.setupEventListeners();
+                this.setupDragAndDrop();
                 this.updateDisplay();
             }
             
@@ -212,6 +252,9 @@
                 
                 // Check if it's a new day
                 this.checkNewDay();
+                
+                // Load saved order first, then progress
+                this.loadSavedOrder();
                 
                 // Load saved state
                 this.loadTodaysProgress();
@@ -318,6 +361,104 @@
             updateDisplay() {
                 const streakCount = localStorage.getItem('streakCount') || '0';
                 document.getElementById('streakCount').textContent = streakCount;
+            }
+            
+            setupDragAndDrop() {
+                const checklist = document.getElementById('checklist');
+                let draggedElement = null;
+                
+                checklist.addEventListener('dragstart', (e) => {
+                    if (e.target.classList.contains('checklist-item')) {
+                        draggedElement = e.target;
+                        e.target.classList.add('dragging');
+                        e.dataTransfer.effectAllowed = 'move';
+                    }
+                });
+                
+                checklist.addEventListener('dragend', (e) => {
+                    if (e.target.classList.contains('checklist-item')) {
+                        e.target.classList.remove('dragging');
+                        // Remove all drag-over classes
+                        document.querySelectorAll('.drag-over').forEach(el => {
+                            el.classList.remove('drag-over');
+                        });
+                        this.saveOrder();
+                        draggedElement = null;
+                    }
+                });
+                
+                checklist.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    const afterElement = this.getDragAfterElement(checklist, e.clientY);
+                    
+                    // Remove previous drag-over indicators
+                    document.querySelectorAll('.drag-over').forEach(el => {
+                        el.classList.remove('drag-over');
+                    });
+                    
+                    if (afterElement == null) {
+                        // Add to end
+                        checklist.appendChild(draggedElement);
+                    } else {
+                        // Add visual indicator
+                        afterElement.classList.add('drag-over');
+                        checklist.insertBefore(draggedElement, afterElement);
+                    }
+                });
+                
+                checklist.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    // Clean up drag-over classes
+                    document.querySelectorAll('.drag-over').forEach(el => {
+                        el.classList.remove('drag-over');
+                    });
+                });
+            }
+            
+            getDragAfterElement(container, y) {
+                const draggableElements = [...container.querySelectorAll('.checklist-item:not(.dragging)')];
+                
+                return draggableElements.reduce((closest, child) => {
+                    const box = child.getBoundingClientRect();
+                    const offset = y - box.top - box.height / 2;
+                    
+                    if (offset < 0 && offset > closest.offset) {
+                        return { offset: offset, element: child };
+                    } else {
+                        return closest;
+                    }
+                }, { offset: Number.NEGATIVE_INFINITY }).element;
+            }
+            
+            saveOrder() {
+                const items = document.querySelectorAll('.checklist-item');
+                const order = Array.from(items).map(item => {
+                    const checkbox = item.querySelector('input[type="checkbox"]');
+                    return checkbox.id;
+                });
+                localStorage.setItem('taskOrder', JSON.stringify(order));
+            }
+            
+            loadSavedOrder() {
+                const savedOrder = JSON.parse(localStorage.getItem('taskOrder') || '[]');
+                if (savedOrder.length === 0) return;
+                
+                const checklist = document.getElementById('checklist');
+                const items = Array.from(checklist.querySelectorAll('.checklist-item'));
+                
+                // Create a map of task ID to element
+                const itemMap = {};
+                items.forEach(item => {
+                    const checkbox = item.querySelector('input[type="checkbox"]');
+                    itemMap[checkbox.id] = item;
+                });
+                
+                // Reorder according to saved order
+                savedOrder.forEach(taskId => {
+                    if (itemMap[taskId]) {
+                        checklist.appendChild(itemMap[taskId]);
+                    }
+                });
             }
         }
         
