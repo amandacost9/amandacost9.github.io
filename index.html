@@ -173,7 +173,7 @@
             </li>
             <li class="checklist-item">
                 <input type="checkbox" id="task10">
-                <label for="task10">9:30pm bed time</label>
+                <label for="task10">Finish eating by 6:30pm</label>
             </li>
             <li class="checklist-item">
                 <input type="checkbox" id="task11">
@@ -181,11 +181,15 @@
             </li>
             <li class="checklist-item">
                 <input type="checkbox" id="task12">
-                <label for="task12">Finish eating 3 hours before bed</label>
+                <label for="task12">9:30pm bed time</label>
+            </li>
+                     <li class="checklist-item">
+                <input type="checkbox" id="task13">
+                <label for="task13">110g total protein for the day</label>
             </li>
         </ul>
         
-        <button class="reset-button" onclick="resetDay()">Reset Day</button>
+        <button class="reset-button" onclick="resetDay()">Reset Today's Progress</button>
     </div>
 
     <script>
@@ -218,18 +222,19 @@
                 const lastActiveDate = localStorage.getItem('lastActiveDate');
                 
                 if (lastActiveDate !== today) {
-                    // New day - check if yesterday was completed
-                    const wasYesterdayCompleted = localStorage.getItem('yesterdayCompleted') === 'true';
+                    // New day - check if previous day was completed
+                    const wasPreviousDayCompleted = localStorage.getItem('dayCompleted') === 'true';
                     
-                    if (lastActiveDate && !wasYesterdayCompleted) {
-                        // Streak broken
+                    if (lastActiveDate && !wasPreviousDayCompleted) {
+                        // Streak broken - reset to 0
                         localStorage.setItem('streakCount', '0');
+                        console.log('Streak reset due to incomplete previous day');
                     }
                     
                     // Reset for new day
                     localStorage.setItem('lastActiveDate', today);
                     localStorage.removeItem('todaysProgress');
-                    localStorage.setItem('yesterdayCompleted', 'false');
+                    localStorage.setItem('dayCompleted', 'false');
                 }
             }
             
@@ -298,13 +303,14 @@
             completeDay() {
                 document.getElementById('completionMessage').style.display = 'block';
                 
-                // Update streak
-                const wasAlreadyCompleted = localStorage.getItem('yesterdayCompleted') === 'true';
-                if (!wasAlreadyCompleted) {
+                // Update streak - only increment if this day hasn't been completed yet
+                const dayAlreadyCompleted = localStorage.getItem('dayCompleted') === 'true';
+                if (!dayAlreadyCompleted) {
                     const currentStreak = parseInt(localStorage.getItem('streakCount') || '0');
                     const newStreak = currentStreak + 1;
                     localStorage.setItem('streakCount', newStreak.toString());
-                    localStorage.setItem('yesterdayCompleted', 'true');
+                    localStorage.setItem('dayCompleted', 'true');
+                    console.log(`Streak updated to: ${newStreak}`);
                     this.updateDisplay();
                 }
             }
@@ -318,7 +324,7 @@
         function resetDay() {
             if (confirm('Are you sure you want to reset today\'s progress?')) {
                 localStorage.removeItem('todaysProgress');
-                localStorage.setItem('yesterdayCompleted', 'false');
+                localStorage.setItem('dayCompleted', 'false');
                 location.reload();
             }
         }
